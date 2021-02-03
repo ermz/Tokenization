@@ -2,11 +2,18 @@
 pragma solidity ^0.7.5;
 
 import "./Crowdsale.sol";
+import "./KycContract.sol";
 
 contract MyTokenSale is Crowdsale {
-	// KycContract kyc;
+	KycContract kyc;
 
-	constructor(uint256 rate, address payable wallet, IERC20 token) Crowdsale(rate, wallet, token) public {
+	constructor(uint256 rate, address payable wallet, IERC20 token, KycContract _kyc) Crowdsale(rate, wallet, token) public {
+		kyc = _kyc;
+	}
 
+	function _preValidatePurchase(address beneficiary, uint256 weiAmount) internal view override {
+		//Wrapper function for a _preValidatePurchase that exista in Crowdsale.sol
+		super._preValidatePurchase(beneficiary, weiAmount);
+		require(kyc.kycCompleted(beneficiary), "KYC not completed yet, aborting");
 	}
 }
